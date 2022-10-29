@@ -9,6 +9,7 @@ import {
   signInWithRedirect,
   signInWithPopup,
   GoogleAuthProvider,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
 ///
 // TODO: Add SDKs for Firebase products that you want to use
@@ -36,11 +37,20 @@ provider.setCustomParameters({
 });
 
 export const auth = getAuth();
+console.log(auth);
+
+//Sign in Google with Pop up
 export const signInWithGooglePopup = () => signInWithPopup(auth, provider);
+
+//Sign in Google with Redirect
+// export const signInWithGoogleRedirect = () =>
+//   signInWithRedirect(auth, provider);
 
 //For Firestore
 export const db = getFirestore();
-export const createUserDocumentFromAuth = async (userAuth) => {
+export const createUserDocumentFromAuth = async (userAuth, addinfo = {}) => {
+  if (!userAuth) return;
+
   const userDocRef = doc(db, "users", userAuth.uid); //parameters database, name , unique ID
   console.log(userDocRef);
   const userSnapshot = await getDoc(userDocRef);
@@ -58,6 +68,7 @@ export const createUserDocumentFromAuth = async (userAuth) => {
         displayName,
         email,
         createdAt,
+        ...addinfo,
       });
     } catch (error) {
       console.error("Error creating the user", error.message);
@@ -66,4 +77,10 @@ export const createUserDocumentFromAuth = async (userAuth) => {
 
   // if userdata exist
   return userDocRef;
+};
+
+export const createAuthUserWithEmailAndPassword = async (email, password) => {
+  if (!email || !password) return;
+
+  return await createUserWithEmailAndPassword(auth, email, password);
 };
